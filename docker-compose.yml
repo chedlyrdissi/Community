@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  client:
+    build: ./client
+    restart: always
+    ports:
+      - "4200:4200"
+    links:
+      - server
+
+  server:
+    build: ./server
+    restart: always
+    ports:
+      - "8080:8080"
+    links:
+      - db
+
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_ROOT_PASSWORD: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DATABASE: community
+    ports:
+      - "6033:5432"
+
+volumes:
+  db-data:
+  driver: local
