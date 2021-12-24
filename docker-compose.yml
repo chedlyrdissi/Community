@@ -1,33 +1,49 @@
 version: "3.9"
 services:
-  client:
-    build: ./client
-    restart: always
-    ports:
-      - "4200:4200"
-    links:
-      - server
+  # client:
+
+  #   # for dev
+  #   build:
+  #     context: ./client
+  #     dockerfile: ./Dockerfile.dev
+  #   volumes:
+  #     - /client/node_modules
+  #     - ./client:/client
+
+  #   # build: ./client
+  #   restart: always
+  #   ports:
+  #     - "4200:4200"
+  #   links:
+  #     - server
 
   server:
+    container_name: community-server
     build: ./server
     restart: always
     ports:
       - "8080:8080"
     links:
-      - db
+      - "db:database"
+    depends_on:
+      - "db"
+    environment:
+      - spring_datasource_url=jdbc:postgresql://db:5432/community-db
+      - spring_datasource_username=root
+      - spring_datasource_password=root
+      - spring_jpa_hibernate_ddl-auto=update
+      - spring_sql_init_platform=postgres
 
   db:
     image: postgres
+    container_name: community-db
     restart: always
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - ./db-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_ROOT_PASSWORD: root
+      POSTGRES_USER: root
       POSTGRES_PASSWORD: root
-      POSTGRES_DATABASE: community
+      POSTGRES_DB: community-db
     ports:
-      - "6033:5432"
-
-volumes:
-  db-data:
-  driver: local
+      # - "6033:5432"
+      - "5432:5432"
